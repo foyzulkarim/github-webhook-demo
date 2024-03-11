@@ -7,8 +7,6 @@ const app = express();
 const port = 3000;
 const webhookSecret = process.env.SECRET;
 
-console.log(webhookSecret);
-
 app.use(bodyParser.json());
 
 function verifyWebhookSignature(req) {
