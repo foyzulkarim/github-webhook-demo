@@ -23,20 +23,19 @@ function verifyWebhookSignature(req) {
   console.log('sigHeader', sigHeader);
   console.log('payload', payload);
 
-  const calculatedSig =
-    'sha256=' +
-    crypto
-      .createHmac('sha256', webhookSecret)
-      .update(JSON.stringify(payload))
-      .digest('hex');
-
-  return sigHeader === calculatedSig;
+  const signature = crypto
+    .createHmac('sha256', webhookSecret)
+    .update(JSON.stringify(req.body))
+    .digest('hex');
+  let trusted = Buffer.from(`sha256=${signature}`, 'ascii');
+  let untrusted = Buffer.from(req.headers.get('x-hub-signature-256'), 'ascii');
+  return crypto.timingSafeEqual(trusted, untrusted);
 }
 
 app.post('/github-webhook', (req, res) => {
   if (!verifyWebhookSignature(req)) {
     console.error('Signature mismatch');
-    return res.sendStatus(403); // Forbidden
+    return res.status(401).send("Unauthorized");
   }
 
   // Signature verified - Process the payload
@@ -59,7 +58,7 @@ app.all('*', (req, res) => {
     console.error('Signature mismatch');
     return res.sendStatus(403); // Forbidden
   }
-  res.send('This is a catch-all route for testing.');
+  res.send('Webhook payload received and verified');
 });
 
 app.listen(port, () => {
