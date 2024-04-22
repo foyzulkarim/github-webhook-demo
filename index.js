@@ -19,7 +19,7 @@ function verifyWebhookSignature(req) {
   }
 
   console.log('sigHeader', sigHeader);
-  console.log('payload', payload);
+  console.log('payload', JSON.stringify(payload));
 
   const signature = crypto
     .createHmac('sha256', webhookSecret)
@@ -37,10 +37,7 @@ app.post('/github-webhook', (req, res) => {
   }
 
   // Signature verified - Process the payload
-  console.log('Webhook payload received and verified:', req.body);
-
-  // Example: Log the event type
-  console.log('Event type:', req.body.event);
+  console.log('Webhook payload received and verified');
 
   res.sendStatus(200); // OK
 });
